@@ -3,11 +3,12 @@
 
 # Question 1 (Naked Twins)
 Q: How do we use constraint propagation to solve the naked twins problem?  
-A: *Student should provide answer here*
+A: In a unit a pair has same pair of possible values. Either one is one of these possible values. So the other boxes in the unit cannot have these possible values.
+Propagate through all the units, find the twins with same possible values, remove these values from the other boxes of the unit.
 
 # Question 2 (Diagonal Sudoku)
 Q: How do we use constraint propagation to solve the diagonal sudoku problem?  
-A: *Student should provide answer here*
+A: In a diagonal sudoku, the diagonals should have unique values in each box. So the units, and thus peers, should be expanded by these diagonal units.
 
 ### Install
 

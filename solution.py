@@ -1,36 +1,4 @@
-assignments = []
-
-rows = 'ABCDEFGHI'
-cols = '123456789'
-
-
-def cross(A, B):
-    "Cross product of elements in A and elements in B."
-    return [s + t for s in A for t in B]
-
-boxes = cross(rows, cols)
-
-row_units = [cross(r, cols) for r in rows]
-column_units = [cross(rows, c) for c in cols]
-square_units = [cross(rs, cs) for rs in ('ABC', 'DEF', 'GHI')
-                for cs in ('123', '456', '789')]
-diagonal_units = [[''.join(box) for box in list(zip(rows, cols))], [
-    ''.join(box) for box in list(zip(reversed(rows), cols))]]
-unitlist = row_units + column_units + square_units + diagonal_units
-units = dict((s, [u for u in unitlist if s in u]) for s in boxes)
-peers = dict((s, set(sum(units[s], [])) - set([s])) for s in boxes)
-
-
-def assign_value(values, box, value):
-    """
-    Please use this function to update your values dictionary!
-    Assigns a value to a given box. If it updates the board record it.
-    """
-    values[box] = value
-    if len(value) == 1:
-        assignments.append(values.copy())
-    return values
-
+from app import assign_value, display, unitlist, peers, cols, boxes, grid_values, assignments
 
 def naked_twins(values):
     """Eliminate values using the naked twins strategy.
@@ -54,10 +22,12 @@ def naked_twins(values):
         """
         from collections import defaultdict
 
+        # Create a dict with {value: [box]}
         value_boxes_dict = defaultdict(lambda: [])
         for box in unit:
             if len(values[box]) == 2:
                 value_boxes_dict[values[box]].append(box)
+        # Return [box if len(dict[value]) == 2]
         return [value_boxes_dict[value] for value in value_boxes_dict if len(value_boxes_dict[value]) == 2]
 
     def eliminate_naked_twins_from_unit(values, unit, naked_twins_boxes):
@@ -68,46 +38,14 @@ def naked_twins(values):
                 for naked_twin_value in values[naked_twins_boxes[0]]:
                     assign_value(values, box, values[box].replace(naked_twin_value, ''))
 
+    # Find naked twins in the units and eliminate them from the unit
     for unit in unitlist:
         naked_twins_array = find_naked_twins(values, unit)
-        if naked_twins_array:
-            display(values)
         for naked_twins_boxes in naked_twins_array:
             eliminate_naked_twins_from_unit(
                 values, unit, naked_twins_boxes)
 
     return values
-
-
-def grid_values(grid):
-    """
-    Convert grid into a dict of {square: char} with '123456789' for empties.
-    Args:
-        grid(string) - A grid in string form.
-    Returns:
-        A grid in dictionary form
-            Keys: The boxes, e.g., 'A1'
-            Values: The value in each box, e.g., '8'. If the box has no value, then the value will be '123456789'.
-    """
-    return {position: (grid[idx] if grid[idx] != '.' else '123456789') for idx, position in enumerate(cross(rows, cols))}
-
-
-def display(values):
-    """
-    Display the values as a 2-D grid.
-    Args:
-        values(dict): The sudoku in dictionary form
-    """
-    # pass
-    width = 1 + max(len(values[s]) for s in boxes)
-    line = '+'.join(['-' * (width * 3)] * 3)
-    for r in rows:
-        print(''.join(values[r + c].center(width) + ('|' if c in '36' else '')
-                      for c in cols))
-        if r in 'CF':
-            print(line)
-    print
-
 
 def eliminate(values):
     """
@@ -146,8 +84,6 @@ def reduce_puzzle(values):
         values = eliminate(values)
         values = only_choice(values)
         values = naked_twins(values)
-        values = eliminate(values)
-        values = only_choice(values)
         solved_boxes_after = len(
             [box for box in values if len(values[box]) == 1])
         stalled = solved_boxes_before == solved_boxes_after
